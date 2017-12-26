@@ -1,3 +1,3 @@
-# MailChimp
-VB.NET Class to use MailChimp APIs
+# tempstuff
+Temporary files
 
