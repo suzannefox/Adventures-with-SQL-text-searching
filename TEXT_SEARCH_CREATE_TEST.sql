@@ -1,10 +1,18 @@
 
-
 -- CREATE A TEXT SEARCH TABLE WITH ALL TEXT TO BE SEARCHED AS ONE FIELD
+USE [abp_search]
 
+-- First time setup, need to create an empty
+-- stoplist because single digits are included
+-- in the default stoplist
+-- DROP FULLTEXT STOPLIST EmptyStoplist;
+-- CREATE FULLTEXT STOPLIST EmptyStopList;  
+
+-- CLEAR OLD TABLE
 DROP TABLE
-	test
+	abp_search
 
+-- CREATE NEW TABLE FROM LOADED CSV FILES IN abp
 SELECT 
 	Id_Identity,
 	UPRN,
@@ -28,30 +36,31 @@ SELECT
 	CASE WHEN WELSH_POST_TOWN <> '' THEN WELSH_POST_TOWN + ' ' ELSE '' END 
 	AS SEARCH
 INTO 
-	test
+	abp_search
 FROM
-	delivery_point
+	abp.dbo.delivery_point
 
 -- ADD THE UNIQUE KEY
-ALTER TABLE test
-ADD CONSTRAINT PK_test
+ALTER TABLE abp_search
+ADD CONSTRAINT PK_abp_search
 -- PRIMARY KEY(Id_Identity)
 	PRIMARY KEY CLUSTERED ([Id_Identity] ASC) 
-	WITH (PAD_INDEX = OFF, 
-		STATISTICS_NORECOMPUTE = OFF, 
-		IGNORE_DUP_KEY = OFF, 
-		ALLOW_ROW_LOCKS = ON, 
-		ALLOW_PAGE_LOCKS = ON) 
 	ON [PRIMARY]
 
+-- DROP AND CREATE CATALOG
+DROP FULLTEXT CATALOG 
+	Address_Catalog;
 
-CREATE FULLTEXT INDEX ON dbo.test(SEARCH) KEY INDEX PK_test;  
+CREATE FULLTEXT CATALOG 
+	Address_Catalog 
+AS DEFAULT; 
 
---SELECT
---	'CASE WHEN ' + COLUMN_NAME +' <> '''' THEN ' + COLUMN_NAME + ' + '' '' ELSE '''' END +'
---FROM  
---	INFORMATION_SCHEMA.COLUMNS
---WHERE
---	TABLE_NAME='delivery_point'
+-- DROP FULLTEXT INDEX ON dbo.abp_search 
+-- CREATE FULL TEXT INDEX
+CREATE FULLTEXT INDEX ON 
+	dbo.abp_search(SEARCH) 
+KEY INDEX 
+	PK_abp_search
+WITH STOPLIST = 
+	EmptyStoplist;
 
---RETURN
